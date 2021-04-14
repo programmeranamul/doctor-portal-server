@@ -48,11 +48,11 @@ client.connect((err) => {
 
     doctorCollection.find({ email: email })
       .toArray((err, doctors) => {
-      
-        const filter = {appointment: date.date}
+
+        const filter = { appointment: date.date }
 
         if (doctors.length === 0) {
-          filter.email= email
+          filter.email = email
         }
 
         appointmentCollection.find(filter)
@@ -72,67 +72,71 @@ client.connect((err) => {
     const name = req.body.name;
     const email = req.body.email;
     const number = req.body.number;
-    const filePath = `${__dirname}/doctors/${file.name}`;
-    file.mv(filePath, err => {
-      if (err) {
-        console.log(err)
-        res.status(500).send({ msg: "Filed To Save" })
-      }
+    // const filePath = `${__dirname}/doctors/${file.name}`;
+    // file.mv(filePath, err => {
+    //   if (err) {
+    //     console.log(err)
+    //     res.status(500).send({ msg: "Filed To Save" })
+    //   }
 
-      const newImg = fs.readFileSync(filePath)
-      const encImg = newImg.toString('base64')
+    //   const newImg = fs.readFileSync(filePath)
+    //   const encImg = newImg.toString('base64')
 
-      var image = {
-        contentType: file.mimetype,
-        size: file.size,
-        img: Buffer.from(encImg, 'base64')
+    var image = {
+      contentType: file.mimetype,
+      size: file.size,
+      img: Buffer.from(encImg, 'base64')
     };
 
+    const newImg = file.data
 
 
-      // return res.send({name:file.name, path : `/${file.name}`})
-      // doctorCollection.insertOne({ name, email, number, img: file.name })
-      doctorCollection.insertOne({ name, email, number, image })
+    // return res.send({name:file.name, path : `/${file.name}`})
+    // doctorCollection.insertOne({ name, email, number, img: file.name })
+    // doctorCollection.insertOne({ name, email, number, image })
+    // .then(result => {
+    //   fs.remove(filePath, error => {
+    //     if(error){
+    //       console.log(error);
+    //       res.status(500).send({ msg: "Filed To Save" })
+    //     }
+    //     res.send(result.insertedCount > 0)
+    //   })
+    //   // res.send(result.insertedCount > 0)
+    //   })
+
+    doctorCollection.insertOne({ name, email, number, image })
       .then(result => {
-        fs.remove(filePath, error => {
-          if(error){
-            console.log(error);
-            res.status(500).send({ msg: "Filed To Save" })
-          }
-          res.send(result.insertedCount > 0)
-        })
-        // res.send(result.insertedCount > 0)
-        })
-
-    })
-  })
-
-
-  //get doctors data from database
-  app.get("/doctors", (req, res) => {
-    doctorCollection.find({})
-      .toArray((err, documents) => {
-        res.send(documents)
+        res.send(result.insertedCount > 0)
       })
+
   })
 
 
-  //start cheek is doctor
-  app.post('/cheekDoctor', (req,res) => {
-    const email =  req.body.email
-    
-    doctorCollection.find({email : email})
+
+//get doctors data from database
+app.get("/doctors", (req, res) => {
+  doctorCollection.find({})
+    .toArray((err, documents) => {
+      res.send(documents)
+    })
+})
+
+
+//start cheek is doctor
+app.post('/cheekDoctor', (req, res) => {
+  const email = req.body.email
+
+  doctorCollection.find({ email: email })
     .toArray((err, documents) => {
       res.send(documents.length > 0)
     })
 
 
-  })
-
+})
 
 
   //end cheek is doctor
-
 
 
 
@@ -140,6 +144,6 @@ client.connect((err) => {
 
 
 
-app.listen(port, () => {
+app.listen(process.env.PORT || port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
